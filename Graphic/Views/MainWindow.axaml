@@ -1,0 +1,66 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:Paint.ViewModels"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+		xmlns:locc="clr-namespace:Paint.Models"
+		xmlns:spp="using:Avalonia.Controls.Shapes"
+        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+		Width="1400" Height="786"
+		MinWidth="1200" MinHeight="786"
+        x:Class="Paint.Views.MainWindow"
+        Icon="/Assets/avalonia-logo.ico"
+        Title="Paint">
+
+	<Design.DataContext>
+		<vm:MainWindowViewModel/>
+	</Design.DataContext>
+
+	<Grid ShowGridLines="True" RowDefinitions="20,*">
+		<Menu Grid.Row="0">
+			<MenuItem Name="menuExport" Header="Экспортировать">
+				<MenuItem Header="Экспортировать в PNG"/>
+				<MenuItem Header="Экспортировать в JSON"/>
+				<MenuItem Header="Экспортировать в XML" Command="{Binding SaveXML}"/>
+			</MenuItem>
+			<MenuItem Name="menuImport" Header="Импортировать">
+				<MenuItem Header="Импортировать из JSON"/>
+				<MenuItem Header="Импортировать из XML"/>
+			</MenuItem>
+		</Menu>
+		<Grid ShowGridLines="True" Grid.Row="1" ColumnDefinitions="300, * , 200">
+			<ComboBox Name="camboBoxShape" Width="300" Grid.Column="0" SelectedIndex="{Binding Combobox_index}">
+				<ComboBoxItem>Прямая линия</ComboBoxItem>
+				<ComboBoxItem>Ломаная линия</ComboBoxItem>
+				<ComboBoxItem>Многоугольник</ComboBoxItem>
+				<ComboBoxItem>Прямоугольник</ComboBoxItem>
+				<ComboBoxItem>Элипс</ComboBoxItem>
+				<ComboBoxItem>Составная фигура</ComboBoxItem>
+			</ComboBox>
+			<ContentControl Content="{Binding Content_colection, Mode=OneWay}" Grid.Column="0"/>			
+			<ItemsControl Items="{Binding Figures_colection, Mode=OneWay}" Grid.Column="1">
+				<ItemsControl.ItemTemplate>
+					<DataTemplate/>
+				</ItemsControl.ItemTemplate>
+				<ItemsControl.ItemsPanel>
+					<ItemsPanelTemplate>
+						<Canvas Name="canvas"/>
+					</ItemsPanelTemplate>
+				</ItemsControl.ItemsPanel>
+			</ItemsControl>
+			<ListBox Name="listBoxShapes" Items="{Binding Figures_name, Mode=OneWay}" Grid.Column="2" SelectedIndex="{Binding Listbox_index, Mode=OneWay}">
+				<ListBox.ItemTemplate>
+					<DataTemplate DataType="{x:Type locc:Names}">
+						<Grid ColumnDefinitions="*,*">
+							<Button Name="buttonDeleteShape" Grid.Column="1" Command="{Binding DeleteBut}">	
+								<Image Source="/Assets/remove.png" Height="20" Width="20"/>
+							</Button>
+							<TextBlock Grid.Column="0" HorizontalAlignment="Left" Text="{Binding Name}"/>
+						</Grid>
+					</DataTemplate>
+				</ListBox.ItemTemplate>
+			</ListBox>
+		</Grid>
+	</Grid>
+	
+</Window>
