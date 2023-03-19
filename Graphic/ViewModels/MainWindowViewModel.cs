@@ -19,10 +19,10 @@ namespace Paint.ViewModels
 		private int comboboxIndex = 0;
 		private int countFigure = 0;
 		private ObservableCollection<Shape> figuresColection;
-		private ViewModelBase[] contentColection;
+        private ViewModelBase curentContent;
+        private MainWindow mainWindow;
+        private ViewModelBase[] contentColection;
 		private ObservableCollection<Names> figuresName;
-		private ViewModelBase curentContent;
-		private MainWindow mainWindow;
 		private Canvas canvas;
 
 		public MainWindowViewModel(MainWindow mw)
@@ -44,21 +44,21 @@ namespace Paint.ViewModels
 
 			curentContent = contentColection[0];
 
-			Line line = new Line();
-			line.StartPoint = new Avalonia.Point(10, 10);
-			line.EndPoint = new Avalonia.Point(100, 10);
-			line.Name = "lin";
-			line.Stroke = SolidColorBrush.Parse("Blue");
-			line.StrokeThickness = 1;
-			figuresColection.Add(line);
-			Names nev = new Names(line.Name, "line", "10,10", "100,10", line.StrokeThickness, "blue");
+			Line _line = new Line();
+            _line.StartPoint = new Avalonia.Point(10, 10);
+            _line.EndPoint = new Avalonia.Point(100, 10);
+            _line.Name = "lin";
+            _line.Stroke = SolidColorBrush.Parse("Blue");
+            _line.StrokeThickness = 1;
+			figuresColection.Add(_line);
+			Names nev = new Names(_line.Name, "line", "10,10", "100,100", _line.StrokeThickness, "black");
 			figuresName.Add(nev);
 
 
 			DeleteBut = ReactiveCommand.Create(() =>
 			{
-				figuresColection.RemoveAt(Listbox_index);
-				figuresName.RemoveAt(Listbox_index);
+				figuresColection.RemoveAt(ListboxIndex);
+				figuresName.RemoveAt(ListboxIndex);
 			});
 		}
 
@@ -83,17 +83,17 @@ namespace Paint.ViewModels
 			xElement.Save(result);
 		}
 
-		public ObservableCollection<Names> Figures_name
-		{
-			get => figuresName;
-			set
-			{
-				this.RaiseAndSetIfChanged(ref figuresName, value);
-			}
-		}
-
 		public ReactiveCommand<Unit, Unit> DeleteBut { get; }
 
+        public ObservableCollection<Names> Figures_name
+        {
+            get => figuresName;
+            set
+            {
+                this.RaiseAndSetIfChanged(ref figuresName, value);
+            }
+        }
+        
 		public ObservableCollection<Shape> Figures_colection
 		{
 			get => figuresColection;
@@ -103,8 +103,8 @@ namespace Paint.ViewModels
 			}
 		}
 
-		public int Listbox_index
-		{
+		public int ListboxIndex
+        {
 			get => listboxIndex;
 			set
 			{
@@ -112,7 +112,7 @@ namespace Paint.ViewModels
 			}
 		}
 
-		public ViewModelBase Content_colection
+		public ViewModelBase ContentColection
 		{
 			get => curentContent;
 			set
@@ -126,7 +126,7 @@ namespace Paint.ViewModels
 			set
 			{
 				comboboxIndex = value;
-				Content_colection = contentColection[value];
+                ContentColection = contentColection[value];
 			}
 		}
 	}

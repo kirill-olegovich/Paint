@@ -37,7 +37,7 @@
 				<ComboBoxItem>Элипс</ComboBoxItem>
 				<ComboBoxItem>Составная фигура</ComboBoxItem>
 			</ComboBox>
-			<ContentControl Content="{Binding Content_colection, Mode=OneWay}" Grid.Column="0"/>			
+			<ContentControl Content="{Binding ContentColection, Mode=OneWay}" Grid.Column="0"/>			
 			<ItemsControl Items="{Binding Figures_colection, Mode=OneWay}" Grid.Column="1">
 				<ItemsControl.ItemTemplate>
 					<DataTemplate/>
@@ -48,7 +48,7 @@
 					</ItemsPanelTemplate>
 				</ItemsControl.ItemsPanel>
 			</ItemsControl>
-			<ListBox Name="listBoxShapes" Items="{Binding Figures_name, Mode=OneWay}" Grid.Column="2" SelectedIndex="{Binding Listbox_index, Mode=OneWay}">
+			<ListBox Name="listBoxShapes" Items="{Binding Figures_name, Mode=OneWay}" Grid.Column="2" SelectedIndex="{Binding ListboxIndex, Mode=OneWay}">
 				<ListBox.ItemTemplate>
 					<DataTemplate DataType="{x:Type locc:Names}">
 						<Grid ColumnDefinitions="*,*">
