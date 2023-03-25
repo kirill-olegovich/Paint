@@ -1,26 +1,22 @@
-﻿using Avalonia.Controls.Shapes;
-using Avalonia.Media;
-using Paint.Models;
+﻿using Graphic.Models;
 using ReactiveUI;
 using System.Collections.ObjectModel;
 
-namespace Paint.ViewModels.Pages
+namespace Graphic.ViewModels.Pages
 {
     public class PolyLineViewModel : ViewModelBase
     {
-        private ObservableCollection<Shape> colection;
-        private ObservableCollection<Names> nam_colection;
+        private ObservableCollection<IFigure> colection;
         private string name, points;
-        private int thic = 1, select = 0;
-        public PolyLineViewModel(ref ObservableCollection<Shape> col, ref ObservableCollection<Names> nam)
+        private int select = 0, select_figure, flag = 0;
+        private double thic = 1;
+        public PolyLineViewModel(ref ObservableCollection<IFigure> col)
         {
             colection = col;
-            nam_colection = nam;
             name = string.Empty;
             points = string.Empty;
         }
 
-        // interf
         public string Name
         {
             get => name;
@@ -39,7 +35,7 @@ namespace Paint.ViewModels.Pages
             }
         }
 
-        public int Thic
+        public double Thic
         {
             get => thic;
             set
@@ -57,75 +53,50 @@ namespace Paint.ViewModels.Pages
             }
         }
 
-        // function
+        public void UpdateRef(ref ObservableCollection<IFigure> figur_colection)
+        {
+            colection = figur_colection;
+        }
+        public void ChangeOption(int num)
+        {
+            select_figure = num;
+            if (select_figure < 0) select_figure = 0;
+            var figure = colection[select_figure] as Gr_PolyLine;
+            Name = figure.Name;
+            Points = figure.save_point;
+            Thic = figure.StrokeThic;
+            var color = figure.StrokeColor.ToString();
+            if (color == "Black") Select = 0;
+            else if (color == "Green") Select = 1;
+            else if (color == "Yellow") Select = 2;
+            else if (color == "Blue") Select = 3;
+            else if (color == "Red") Select = 4;
+            else Select = 5;
+            flag = 1;
+        }
         public void Button_add()
         {
             if (Points != null && Name != null)
             {
-                string temp_point = string.Empty, temp_all_point = Points;
-                int i = 0;
-                Avalonia.Point point;
-                SolidColorBrush color1;
-                ObservableCollection<Avalonia.Point> col_point = new ObservableCollection<Avalonia.Point>();
+                string temp_all_point = Points;
 
-                string color11 = string.Empty, color22 = string.Empty;
-                if (select == 0)
-                {
-                    color1 = SolidColorBrush.Parse("Black");
-                    color11 = "Black";
-                }
-                else if (select == 1)
-                {
-                    color1 = SolidColorBrush.Parse("Green");
-                    color11 = "Green";
-                }
-                else if (select == 2)
-                {
-                    color1 = SolidColorBrush.Parse("Yellow");
-                    color11 = "Yellow";
-                }
-                else if (select == 3)
-                {
-                    color1 = SolidColorBrush.Parse("Blue");
-                    color11 = "Blue";
-                }
-                else if (select == 4)
-                {
-                    color1 = SolidColorBrush.Parse("Red");
-                    color11 = "Red";
-                }
-                else
-                {
-                    color1 = SolidColorBrush.Parse("RosyBrown");
-                    color11 = "RosyBrown";
-                }
+                string color11 = string.Empty;
+                if (select == 0) color11 = "Black";
+                else if (select == 1) color11 = "Green";
+                else if (select == 2) color11 = "Yellow";
+                else if (select == 3) color11 = "Blue";
+                else if (select == 4) color11 = "Red";
+                else color11 = "RosyBrown";
 
-
-                Polyline polyline = new Polyline();
-                polyline.Name = Name;
-                for (i = 0; i < temp_all_point.Length; i++)
+                Gr_PolyLine polyLine = new Gr_PolyLine(Name, temp_all_point, color11, Thic);
+                if (flag == 0) colection.Add(polyLine);
+                else if (flag == 1)
                 {
-                    if (temp_all_point[i] != ' ') temp_point += temp_all_point[i];
-                    else
-                    {
-                        point = Avalonia.Point.Parse(temp_point);
-                        col_point.Add(point);
-                        temp_point = string.Empty;
-                    }
-                    if (temp_all_point[i] != ' ' && i == temp_all_point.Length - 1)
-                    {
-                        point = Avalonia.Point.Parse(temp_point);
-                        col_point.Add(point);
-                        temp_point = string.Empty;
-                    }
+                    colection[select_figure] = polyLine;
+                    flag = 0;
+                    select_figure = -2;
                 }
-                polyline.Points = col_point;
-                polyline.Stroke = color1;
-                polyline.StrokeThickness = Thic;
-                colection.Add(polyline);
-
-                Names nam = new Names(polyline.Name, "polyline", temp_all_point, polyline.StrokeThickness, color11);
-                nam_colection.Add(nam);
+                Button_cancel();
             }
         }
 

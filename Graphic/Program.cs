@@ -2,7 +2,7 @@
 using Avalonia.ReactiveUI;
 using System;
 
-namespace Paint
+namespace Graphic
 {
 	internal class Program
 	{

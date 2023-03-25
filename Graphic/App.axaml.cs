@@ -1,10 +1,10 @@
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
-using Paint.ViewModels;
-using Paint.Views;
+using Graphic.ViewModels;
+using Graphic.Views;
 
-namespace Paint
+namespace Graphic
 {
     public partial class App : Application
     {

@@ -1,132 +1,173 @@
 ﻿using Avalonia.Controls;
-using Avalonia.Controls.Shapes;
-using Avalonia.Media;
-using Paint.Models;
-using Paint.ViewModels.Pages;
-using Paint.Views;
+using Graphic.Models;
+using Graphic.ViewModels.Pages;
+using Graphic.Views;
 using ReactiveUI;
 using System.Collections.ObjectModel;
-using System.IO;
-using System.Reactive;
-using System.Xml.Linq;
-using System.Xml.Serialization;
+using System.Threading.Tasks;
 
-namespace Paint.ViewModels
+namespace Graphic.ViewModels
 {
 	public class MainWindowViewModel : ViewModelBase
 	{
-		private int listboxIndex = 0;
-		private int comboboxIndex = 0;
-		private int countFigure = 0;
-		private ObservableCollection<Shape> figuresColection;
-        private ViewModelBase curentContent;
-        private MainWindow mainWindow;
-        private ViewModelBase[] contentColection;
-		private ObservableCollection<Names> figuresName;
-		private Canvas canvas;
+		private ObservableCollection<IFigure> figures_colection;
+		private ViewModelBase[] content_colection;
+		private ViewModelBase curent_content;
+		private MainWindow mainWindow;
+		private ItemsControl items;
+		private int listbox_index = -1, combobox_index = 0;
+		private LineViewModel line_content;
+		private PolyLineViewModel polyline_content;
+		private PolygonViewModel polygon_content;
+		private RectangleViewModel rectangle_content;
+		private EllipseViewModel ellipse_content;
+		private PathViewModel path_content;
 
 		public MainWindowViewModel(MainWindow mw)
 		{
+			figures_colection = new ObservableCollection<IFigure>();
+
 			mainWindow = mw;
-			canvas = mainWindow.Find<Canvas>("canvas");
-			figuresColection = new ObservableCollection<Shape>();
-			figuresName = new ObservableCollection<Names>();
+			items = mainWindow.Find<ItemsControl>("canvas");
 
-			contentColection = new ViewModelBase[]
+			line_content = new LineViewModel(ref figures_colection);
+			polyline_content = new PolyLineViewModel(ref figures_colection);
+			polygon_content = new PolygonViewModel(ref figures_colection);
+			rectangle_content = new RectangleViewModel(ref figures_colection);
+			ellipse_content = new EllipseViewModel(ref figures_colection);
+			path_content = new PathViewModel(ref figures_colection);
+
+			content_colection = new ViewModelBase[]
 			{
-				new LineViewModel(ref figuresColection, ref figuresName),
-				new PolyLineViewModel(ref figuresColection, ref figuresName),
-				new PolygonViewModel(ref figuresColection, ref figuresName),
-				new RectangleViewModel(ref figuresColection, ref figuresName),
-				new EllipseViewModel(ref figuresColection, ref figuresName),
-				new PathViewModel(ref figuresColection, ref figuresName)
+				line_content,
+				polyline_content,
+				polygon_content,
+				rectangle_content,
+				ellipse_content,
+				path_content
 			};
-
-			curentContent = contentColection[0];
-
-			Line _line = new Line();
-            _line.StartPoint = new Avalonia.Point(10, 10);
-            _line.EndPoint = new Avalonia.Point(100, 10);
-            _line.Name = "lin";
-            _line.Stroke = SolidColorBrush.Parse("Blue");
-            _line.StrokeThickness = 1;
-			figuresColection.Add(_line);
-			Names nev = new Names(_line.Name, "line", "10,10", "100,100", _line.StrokeThickness, "black");
-			figuresName.Add(nev);
-
-
-			DeleteBut = ReactiveCommand.Create(() =>
-			{
-				figuresColection.RemoveAt(ListboxIndex);
-				figuresName.RemoveAt(ListboxIndex);
-			});
-		}
-
-		static string Convert(object classObject)
-		{
-			string xmlString = null;
-			XmlSerializer xmlSerializer = new XmlSerializer(classObject.GetType());
-			using (MemoryStream memoryStream = new MemoryStream())
-			{
-				xmlSerializer.Serialize(memoryStream, classObject);
-				memoryStream.Position = 0;
-				xmlString = new StreamReader(memoryStream).ReadToEnd();
-			}
-			return xmlString;
+			curent_content = content_colection[0];
 		}
 		public async void SaveXML()
 		{
 			SaveFileDialog saveFileDialog = new SaveFileDialog();
 			string? result = await saveFileDialog.ShowAsync(mainWindow);
-			string xmlstring = Convert(figuresName);
-			XElement xElement = XElement.Parse(xmlstring);
-			xElement.Save(result);
+			XmlFunction xml_saver = new XmlFunction();
+			xml_saver.XmlSave(result, figures_colection);
 		}
-
-		public ReactiveCommand<Unit, Unit> DeleteBut { get; }
-
-        public ObservableCollection<Names> Figures_name
-        {
-            get => figuresName;
-            set
-            {
-                this.RaiseAndSetIfChanged(ref figuresName, value);
-            }
-        }
-        
-		public ObservableCollection<Shape> Figures_colection
+		public async Task LoadXML()
 		{
-			get => figuresColection;
+			OpenFileDialog openFileDialog = new OpenFileDialog();
+			string[]? result = await openFileDialog.ShowAsync(mainWindow);
+			XmlFunction xml_loader = new XmlFunction();
+			Figures_colection = new ObservableCollection<IFigure>(xml_loader.XmlLoad(result[0]));
+			UpdateAllRef();
+		}
+		public async Task SaveJSON()
+		{
+			SaveFileDialog saveFileDialog = new SaveFileDialog();
+			string? result = await saveFileDialog.ShowAsync(mainWindow);
+			JsonFunction json_saver = new JsonFunction();
+			json_saver.JsonSave(figures_colection, result);
+		}
+		public async Task LoadJSON()
+		{
+			OpenFileDialog openFileDialog = new OpenFileDialog();
+			string[]? result = await openFileDialog.ShowAsync(mainWindow);
+			JsonFunction json_loader = new JsonFunction();
+			Figures_colection = new ObservableCollection<IFigure>(json_loader.JsonLoad(result[0]));
+			UpdateAllRef();
+		}
+		public async Task SavePng()
+		{
+			SaveFileDialog saveFileDialog = new SaveFileDialog();
+			string? result = await saveFileDialog.ShowAsync(mainWindow);
+			PngFunction png_saver = new PngFunction();
+			png_saver.PngSave(result, items);
+		}
+		public void DeleteBut()
+		{
+			if (Listbox_index >= 0) figures_colection.RemoveAt(Listbox_index);
+		}
+		private void UpdateAllRef()
+		{
+			line_content.UpdateRef(ref figures_colection);
+			polyline_content.UpdateRef(ref figures_colection);
+			polygon_content.UpdateRef(ref figures_colection);
+			rectangle_content.UpdateRef(ref figures_colection);
+			ellipse_content.UpdateRef(ref figures_colection);
+			path_content.UpdateRef(ref figures_colection);
+		}
+		public ObservableCollection<IFigure> Figures_colection
+		{
+			get => figures_colection;
 			set
 			{
-				this.RaiseAndSetIfChanged(ref figuresColection, value);
+				this.RaiseAndSetIfChanged(ref figures_colection, value);
 			}
 		}
-
-		public int ListboxIndex
-        {
-			get => listboxIndex;
-			set
-			{
-				this.RaiseAndSetIfChanged(ref listboxIndex, value);
-			}
-		}
-
-		public ViewModelBase ContentColection
+		public int Listbox_index
 		{
-			get => curentContent;
+			get => listbox_index;
 			set
 			{
-				this.RaiseAndSetIfChanged(ref curentContent, value);
+				this.RaiseAndSetIfChanged(ref listbox_index, value);
+				if (listbox_index >= 0)
+				{
+					if (figures_colection[listbox_index] is Gr_Line)
+					{
+						Combobox_index = 0;
+						line_content.ChangeOption(listbox_index);
+					}
+					else if (figures_colection[listbox_index] is Gr_PolyLine)
+					{
+						Combobox_index = 1;
+						polyline_content.ChangeOption(Listbox_index);
+					}
+					else if (figures_colection[listbox_index] is Gr_Polygon)
+					{
+						Combobox_index = 2;
+						polygon_content.ChangeOption(listbox_index);
+					}
+					else if (figures_colection[listbox_index] is Gr_Rectangle)
+					{
+						Combobox_index = 3;
+						rectangle_content.ChangeOption(listbox_index);
+					}
+					else if (figures_colection[listbox_index] is Gr_Ellipse)
+					{
+						Combobox_index = 4;
+						ellipse_content.ChangeOption(listbox_index);
+					}
+					else if (figures_colection[listbox_index] is Gr_Path)
+					{
+						Combobox_index = 5;
+						path_content.ChangeOption(listbox_index);
+					}
+				}
 			}
 		}
 		public int Combobox_index
 		{
-			get => comboboxIndex;
+			get => combobox_index;
 			set
 			{
-				comboboxIndex = value;
-                ContentColection = contentColection[value];
+				this.RaiseAndSetIfChanged(ref combobox_index, value);
+				line_content.Button_cancel();
+				polyline_content.Button_cancel();
+				polygon_content.Button_cancel();
+				rectangle_content.Button_cancel();
+				ellipse_content.Button_cancel();
+				path_content.Button_cancel();
+				Content_colection = content_colection[value];
+			}
+		}
+		public ViewModelBase Content_colection
+		{
+			get => curent_content;
+			set
+			{
+				this.RaiseAndSetIfChanged(ref curent_content, value);
 			}
 		}
 	}

@@ -1,14 +1,14 @@
 using Avalonia.Controls;
-using Paint.ViewModels;
+using Graphic.ViewModels;
 
-namespace Paint.Views
+namespace Graphic.Views
 {
-	public partial class MainWindow : Window
-	{
-		public MainWindow()
-		{
-			InitializeComponent();
-			DataContext = new MainWindowViewModel(this);
-		}
-	}
+    public partial class MainWindow : Window
+    {
+        public MainWindow()
+        {
+            InitializeComponent();
+            DataContext = new MainWindowViewModel(this);
+        }
+    }
 }

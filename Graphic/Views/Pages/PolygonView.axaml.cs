@@ -1,6 +1,6 @@
 using Avalonia.Controls;
 
-namespace Paint.Views.Pages
+namespace Graphic.Views.Pages
 {
     public partial class PolygonView : UserControl
     {
